@@ -1,0 +1,31 @@
+You don't need anything nvidia or linux related in /boot/loader.conf. This is all you need:
+
+rc.conf:kld_list="linux nvidia-modeset"
+
+To remove the loader.conf variables, option 2 (Boot single user) won't work as the loader will load everything specified in loader.conf and hang! Select option 3 (Escape to loader prompt), then to its prompt type the following.
+
+load boot/kernel/kernel
+include boot/device.hints
+boot -s
+This boots into single user mode without reading loader.conf. Hit return to get to shell prompt, then mount -u / to make the root FS writable. Then edit /boot/loader.conf to remove linux and nvidia related options. Now reboot.
+
+This has likely nothing to do with UEFI either. I am booting on a UEFI system.
+
+
+These worked -- thank you! Modified my install instructions to the following:
+
+‘pkg install nvidia-driver nvidia-settings’
+‘sysrc kld_list="nvidia-modeset nvidia”’
+‘vi /usr/local/etc/X11/xorg.conf.d/driver-nvidia.conf’
+Add the following lines to the file:
+Section "Device"
+(Tab) Identifier "NVIDIA Card"
+(Tab) VendorName "NVIDIA Corporation"
+(Tab) Driver "nvidia"
+EndSection
+Reboot
+
+
+Use kld_list in rc.conf or load the modules in loader.conf. Don't do both. For the NVidia drivers I would recommend using kld_list. And you don't need to load nvidia if you already included nvidia-modeset.
+
+Disable onboard video in BIOS, make sure that your display is connected to Nvidia card
